@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>表盘按钮计算器</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .input-group { margin: 10px 0; }
+        input { width: 50px; margin: 0 5px; }
+        #result { margin: 20px 0; padding: 10px; border: 1px solid #ccc; }
+    </style>
+</head>
+<body>
+    <h1>表盘按钮控制方案计算器</h1>
+    
+    <div class="input-group">
+        初始时间：
+        <input type="number" id="h0" min="1" max="12" value="1"> 时针数字
+        <input type="number" id="m0" min="1" max="12" value="2"> 分针数字
+        <input type="number" id="s0" min="1" max="12" value="3"> 秒针数字
+    </div>
+    
+    <div class="input-group">
+        目标时间：
+        <input type="number" id="h1" min="1" max="12" value="5"> 时针数字
+        <input type="number" id="m1" min="1" max="12" value="8"> 分针数字
+        <input type="number" id="s1" min="1" max="12" value="7"> 秒针数字
+    </div>
+    
+    <button onclick="calculate()">计算方案</button>
+    <div id="result"></div>
+
+    <script>
+        function calculate() {
+            // 获取输入值
+            const H0 = parseInt(document.getElementById('h0').value);
+            const M0 = parseInt(document.getElementById('m0').value);
+            const S0 = parseInt(document.getElementById('s0').value);
+            const H1 = parseInt(document.getElementById('h1').value);
+            const M1 = parseInt(document.getElementById('m1').value);
+            const S1 = parseInt(document.getElementById('s1').value);
+            
+            // 计算转动净次数（模12）
+            const h = (H1 - H0 + 12) % 12;
+            const m = (M1 - M0 + 12) % 12;
+            const s = (S1 - S0 + 12) % 12;
+            
+            // 检查是否有解
+            if ((h + m + s) % 2 !== 0) {
+                document.getElementById('result').innerText = "无解，无法从初始时间到达目标时间。";
+                return;
+            }
+            
+            // 计算基础解
+            const a0 = (h + m - s) / 2;
+            const b0 = (m + s - h) / 2;
+            const c0 = (h + s - m) / 2;
+            
+            // 寻找最小总次数的非负解
+            let minTotal = Infinity;
+            let bestA, bestB, bestC;
+            for (let k = 0; k < 12; k++) {
+                const a = a0 + k;
+                const b = b0 + k;
+                const c = c0 + k;
+                if (a >= 0 && b >= 0 && c >= 0) {
+                    const total = a + b + c;
+                    if (total < minTotal) {
+                        minTotal = total;
+                        bestA = a;
+                        bestB = b;
+                        bestC = c;
+                    }
+                }
+            }
+            
+            // 输出结果
+            if (minTotal !== Infinity) {
+                document.getElementById('result').innerText = 
+                    `最少按按钮次数：${minTotal}\n` +
+                    `方案：\n` +
+                    `按钮A（时针+分针）按 ${bestA} 次\n` +
+                    `按钮B（分针+秒针）按 ${bestB} 次\n` +
+                    `按钮C（秒针+时针）按 ${bestC} 次`;
+            } else {
+                document.getElementById('result').innerText = "无解，无法从初始时间到达目标时间。";
+            }
+        }
+    </script>
+</body>
+</html>
